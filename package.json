@@ -1,0 +1,11 @@
+{
+  "name": "spectacles_parser",
+  "version": "1.0.0",
+  "description": "Converts the output of Spectacles CLI into a csv file.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Martin Chakarov",
+  "license": "ISC"
+}
