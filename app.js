@@ -1,5 +1,6 @@
 const { promises: fs } = require("fs");
 const fss = require("fs");
+const resolve = require('path').resolve;
 const rl = require('readline').createInterface({
     input: process.stdin,
     output: process.stdout
@@ -14,6 +15,9 @@ let path;
 let delimiter;
 let id = 1;
 let output = `ID${delimiter}Field${delimiter}Error${delimiter}LookML${delimiter}TestSQL`;
+
+let totalUniqueErrors = new Set();
+let totalDimensions = 0;
 
 console.log(`
 🕶️    Spectacles Log Parser version 0.1    🕶️
@@ -56,7 +60,7 @@ Hello there, thank you for using the Spectacles Log Parser!
 
             let data = await fs.readFile(path, 'utf-8');
 
-            console.log('\nAnalyzing Spectacles logs...');
+            console.log('\nAnalyzing Spectacles logs...\n');
 
             data = data.toString().split('\n\n').slice(3);
         
@@ -75,7 +79,10 @@ Hello there, thank you for using the Spectacles Log Parser!
                     lookML = line.replace('LookML: ', '');
                 } else if (regexPatterns.testSQL.test(line)) {
                     testSQL = line.replace('Test SQL: ', '');
-                    error = error.replace(/\n/g, ' ')
+                    error = error.replace(/\n/g, ' ');
+
+                    totalUniqueErrors.add(error.trim());
+                    totalDimensions++;
                     
                     output += `\n${id}${delimiter}${field}${delimiter}${error}${delimiter}${lookML}${delimiter}${testSQL}`;
                     
@@ -94,12 +101,15 @@ Hello there, thank you for using the Spectacles Log Parser!
 
             let date = new Date(Date.now());
             let outputFile = `output/results_${date.getFullYear()}${date.getMonth()}${date.getDate()}_${date.getHours()}${date.getMinutes()}${date.getSeconds()}.csv`;
-            
+            let outputPath = resolve(`./output/${outputFile}`);
+
             await fs.writeFile(outputFile, result, 'utf-8');
-            console.log(`
-✔️  Done! Your results have been saved to ${__dirname}/output/${outputFile}
-            
-Happy debugging! 😎\n`)
+            console.log(`✔️  Done! Your results have been saved to ${outputPath}\n`);
+
+            console.table({"Total Dimensions Affected": totalDimensions, "Total Unique Errors": totalUniqueErrors.size});
+
+            console.log(`\nHappy debugging! 😎\n`)
+
 
         } catch (err) {
             console.error(err);
