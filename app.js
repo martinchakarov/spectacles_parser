@@ -1,6 +1,6 @@
 const { promises: fs } = require("fs");
 const fss = require("fs");
-const readline = require('readline').createInterface({
+const rl = require('readline').createInterface({
     input: process.stdin,
     output: process.stdout
   });
@@ -10,9 +10,10 @@ const readline = require('readline').createInterface({
     lookML: /LookML: https:\/\/.*/g,
     testSQL: /Test SQL: .*/g
 };
-
+let path;
+let delimiter;
 let id = 1;
-let output = 'ID|Field|Error|LookML|TestSQL';
+let output = `ID${delimiter}Field${delimiter}Error${delimiter}LookML${delimiter}TestSQL`;
 
 console.log(`
 🕶️    Spectacles Log Parser version 0.1    🕶️
@@ -21,21 +22,38 @@ Hello there, thank you for using the Spectacles Log Parser!
 
   `);
 
-readline.question(`To begin, please specify the relative path to the file you wish to parse.\n\nPath ➡️    `, (name) => {
-    let path = name;
+  const pathQuestion = () => {
+    return new Promise((resolve, reject) => {
+        rl.question(`To begin, please specify the relative path to the file you wish to parse.\nPath  ➡️      `, (answer) => {
+            path = answer;
+            try {
+                if (fss.existsSync(path)) {
+                    console.log(`\nThanks!`);
+                }
+              } catch(err) {
+                console.log('\n' + err);
+              }
+            resolve();
+      });
+    });
+  }
 
-    try {
-        if (fss.existsSync(path)) {
-            console.log(`\nThanks!`);
-        }
-      } catch(err) {
-        console.log('\n' + err);
-      }
-
-    readline.close();
+  const delimiterQuestion = () => {
+    return new Promise((resolve, reject) => {
+      rl.question('\nOne more thing: What delimiter would you like to use for your CSV file?\nDelimiter  ➡️      ', (answer) => {
+        delimiter = answer;
+        console.log(`\nAlrighty, we'll use "${answer}"! 😊`);
+        resolve();
+      })
+    })
+  }
 
     (async() => {
         try {
+            await pathQuestion()
+            await delimiterQuestion()
+            rl.close()
+
             let data = await fs.readFile(path, 'utf-8');
 
             console.log('\nAnalyzing Spectacles logs...');
@@ -59,7 +77,7 @@ readline.question(`To begin, please specify the relative path to the file you wi
                     testSQL = line.replace('Test SQL: ', '');
                     error = error.replace(/\n/g, ' ')
                     
-                    output += `\n${id}|${field}|${error}|${lookML}|${testSQL}`;
+                    output += `\n${id}${delimiter}${field}${delimiter}${error}${delimiter}${lookML}${delimiter}${testSQL}`;
                     
                     field = '';
                     error = '';
@@ -87,5 +105,3 @@ Happy debugging! 😎\n`)
             console.error(err);
         }
     })();
-
-});
