@@ -7,14 +7,14 @@ const rl = require('readline').createInterface({
   });
 
   const regexPatterns = {
-    field: /===.*===/g,
+    field: /=* \[\d+m.*\[\d+m =*/g,
     lookML: /LookML: https:\/\/.*/g,
     testSQL: /Test SQL: .*/g
 };
 let path;
 let delimiter;
 let id = 1;
-let output = `ID${delimiter}Field${delimiter}Error${delimiter}LookML${delimiter}TestSQL`;
+let output;
 
 let totalUniqueErrors = new Set();
 let totalDimensions = 0;
@@ -68,6 +68,8 @@ Hello there, thank you for using the Spectacles Log Parser!
             let error = '';
             let lookML = '';
             let testSQL = '';
+
+            output = `ID${delimiter}Field${delimiter}Error${delimiter}LookML${delimiter}TestSQL`;
 
             data.forEach(line => {
                 if (regexPatterns.field.test(line)) {
