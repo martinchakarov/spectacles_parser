@@ -102,7 +102,7 @@ Hello there, thank you for using the Spectacles Log Parser!
             let result = output;
 
             let date = new Date(Date.now());
-            let outputFile = `output/results_${date.getFullYear()}${date.getMonth()}${date.getDate()}_${date.getHours()}${date.getMinutes()}${date.getSeconds()}.csv`;
+            let outputFile = `output/${createFilename()}`;
             let outputPath = resolve(`./output/${outputFile}`);
 
             await fs.writeFile(outputFile, result, 'utf-8');
@@ -117,3 +117,22 @@ Hello there, thank you for using the Spectacles Log Parser!
             console.error(err);
         }
     })();
+
+    function createFilename() {
+      let currentDate = new Date(Date.now())
+  
+      let dateString = currentDate.toLocaleTimeString("en-GB", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit"
+      });
+  
+      let [day, month, year] = dateString.slice(0, 10).split('/');
+  
+      let [hour, minute, second] = dateString.slice(dateString.indexOf(',')+2).split(':');
+  
+      return `results_${year}${month}${day}_${hour}${minute}${second}.csv`
+    }
